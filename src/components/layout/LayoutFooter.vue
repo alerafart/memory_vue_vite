@@ -1,5 +1,4 @@
 <script setup></script>
-
 <template>
-  <main class="border-2">home view</main>
+  <header>footer</header>
 </template>
