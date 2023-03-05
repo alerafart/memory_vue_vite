@@ -1,12 +1,8 @@
 <script setup>
-import { ref, reactive, onUpdated } from "vue";
+import { ref, reactive } from "vue";
 
 import cardsData from "../data/animals.json";
 
-onUpdated(() => {
-  console.log("notfound value :", notFound.value);
-  console.log("found value :", found.value);
-});
 // duplicate each card of the deck
 let duplicateCards = cardsData.concat(cardsData);
 
@@ -17,16 +13,13 @@ duplicateCards = duplicateCards.map((card, index) => {
     id: (index + 1).toString().padStart(2, "0"),
   };
 });
-const pairs = ref([]);
-const found = ref([]);
-let notFound = ref([]);
+
 // shuffle cards mix order
 let shuffledCardsData = shuffle(duplicateCards);
 
 let cards = reactive(shuffledCardsData);
 cards.forEach((card) => {
   card.isFlipped = false;
-  notFound.value.push(card.image);
 });
 
 function shuffle(array) {
@@ -43,10 +36,8 @@ function shuffle(array) {
   }
   return newArray;
 }
-
-console.log("notfound value :", notFound.value);
-console.log("found value :", found.value);
-// console.log(typeof notFound.value, typeof found.value);
+const pairs = ref([]);
+const found = ref([]);
 // const flip = ref(null);
 // const finished = ref(false);
 
@@ -64,16 +55,9 @@ function flipCard(card) {
 // compares 2 flipped cards
 function compare(a, b) {
   if (a == b) {
-    console.log("match", a, b);
+    console.log("match");
     found.value.push(a, b);
-
-    // remove found values from not found
-    notFound.value = notFound.value.filter(
-      (item) => !found.value.includes(item)
-    );
-    // console.log("found :", found);
-    // console.log("pairs found" + found.value);
-    // console.log("pairs not found" + notFound.value);
+    console.log("pairs found" + found.value);
   } else {
     console.log("no match");
     // unflip cards after 1 second
