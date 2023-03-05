@@ -5,7 +5,7 @@ import cardsData from "../data/animals.json";
 // console.log(cardsData);
 
 function shuffle(array) {
-  const newArray = [...array];
+  const newArray = [...array, array];
   const length = newArray.length;
   for (let start = 0; start < length; start++) {
     const randomPosition = Math.floor(
@@ -18,33 +18,21 @@ function shuffle(array) {
   }
   return newArray;
 }
-console.log(cardsData);
 
-let shuffledCardsData = cardsData.concat(cardsData);
-console.log("before shuffle: ", shuffledCardsData);
-shuffledCardsData = shuffle(shuffledCardsData);
-console.log("after shuffle: ", shuffledCardsData);
-
-shuffledCardsData = shuffledCardsData.map((card, index) => {
-  return {
-    ...card,
-    id: (index + 1).toString().padStart(2, "0"),
-    // rename id with a different value
-  };
-});
-console.log("after rename id: ", shuffledCardsData);
+let shuffledCardsData = shuffle(cardsData);
 
 let cards = reactive(shuffledCardsData);
-console.log(cards);
 
+console.log(cards);
+// cards = cards.concat(cards);
 // cards = cards.map((card, index) => {
 //   return {
 //     ...card,
-//     id: (index + 1).toString().padStart(2, "0"),
-//     // rename id with a different value
+//     id: (index + 1).toString().padStart(2, "0"), // rename id with a different value
 //   };
 // });
 
+// console.log(updatedData);
 console.log(cards);
 onUpdated(() => {
   // console.log(...cards, "onUpdated");
