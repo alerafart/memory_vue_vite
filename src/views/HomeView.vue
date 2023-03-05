@@ -1,8 +1,26 @@
 <script setup>
-import { ref, reactive, onMounted, onUpdated, toRefs } from "vue";
-// import Vue from "vue";
+import { ref, reactive } from "vue";
+
 import cardsData from "../data/animals.json";
-// console.log(cardsData);
+
+// duplicate each card of the deck
+let duplicateCards = cardsData.concat(cardsData);
+
+// rename each id with a different value, before we had each id twice and we need unique objects to flip each card sepparately
+duplicateCards = duplicateCards.map((card, index) => {
+  return {
+    ...card,
+    id: (index + 1).toString().padStart(2, "0"),
+  };
+});
+
+// shuffle cards mix order
+let shuffledCardsData = shuffle(duplicateCards);
+
+let cards = reactive(shuffledCardsData);
+cards.forEach((card) => {
+  card.isFlipped = false;
+});
 
 function shuffle(array) {
   const newArray = [...array];
@@ -18,38 +36,6 @@ function shuffle(array) {
   }
   return newArray;
 }
-console.log(cardsData);
-
-let shuffledCardsData = cardsData.concat(cardsData);
-console.log("before shuffle: ", shuffledCardsData);
-shuffledCardsData = shuffle(shuffledCardsData);
-console.log("after shuffle: ", shuffledCardsData);
-
-shuffledCardsData = shuffledCardsData.map((card, index) => {
-  return {
-    ...card,
-    id: (index + 1).toString().padStart(2, "0"),
-    // rename id with a different value
-  };
-});
-console.log("after rename id: ", shuffledCardsData);
-
-let cards = reactive(shuffledCardsData);
-console.log(cards);
-
-// cards = cards.map((card, index) => {
-//   return {
-//     ...card,
-//     id: (index + 1).toString().padStart(2, "0"),
-//     // rename id with a different value
-//   };
-// });
-
-console.log(cards);
-onUpdated(() => {
-  // console.log(...cards, "onUpdated");
-});
-
 const pairs = ref([]);
 const found = ref([]);
 // const flip = ref(null);
@@ -65,8 +51,6 @@ function flipCard(card) {
     console.log(pairs.value[0].image, pairs.value[1].image);
     compare(pairs.value[0].image, pairs.value[1].image);
   }
-  // Vue.set(card, "isFlipped", true);
-  // <-- update the property with Vue.set()
 }
 // compares 2 flipped cards
 function compare(a, b) {
