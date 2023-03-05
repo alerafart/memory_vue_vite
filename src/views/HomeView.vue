@@ -1,11 +1,27 @@
 <script setup>
-import { ref, reactive, onMounted, onUpdated } from "vue";
+import { ref, reactive, onMounted, onUpdated, toRefs } from "vue";
 // import Vue from "vue";
 import cardsData from "../data/animals.json";
-const cards = reactive(cardsData);
+console.log(cardsData);
+function shuffle(array) {
+  const newArray = [...array];
+  const length = newArray.length;
+
+  for (let start = 0; start < length; start++) {
+    const randomPosition = Math.floor(
+      (newArray.length - start) * Math.random()
+    );
+    const randomItem = newArray.splice(randomPosition, 1);
+    newArray.push(...randomItem);
+  }
+  return newArray;
+}
+
+let shuffledCardsData = shuffle(cardsData);
+let cards = reactive(shuffledCardsData);
 
 onUpdated(() => {
-  console.log(...cards, "onUpdated");
+  // console.log(...cards, "onUpdated");
 });
 
 const pairs = ref([]);
