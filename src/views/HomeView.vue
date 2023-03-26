@@ -1,11 +1,14 @@
 <script setup>
-import { ref, reactive, onUpdated } from "vue";
+import { ref, reactive, onUpdated, onMounted } from "vue";
 
 import cardsData from "../data/animals.json";
-
+onMounted(() => {
+  console.log("onMounted notfound value :", notFound.value);
+  console.log("onMounted found value :", found.value);
+});
 onUpdated(() => {
-  console.log("notfound value :", notFound.value);
-  console.log("found value :", found.value);
+  console.log("onUpdated notfound value :", notFound.value);
+  console.log("onUpdated found value :", found.value);
 });
 // duplicate each card of the deck
 let duplicateCards = cardsData.concat(cardsData);
@@ -20,13 +23,14 @@ duplicateCards = duplicateCards.map((card, index) => {
 const pairs = ref([]);
 const found = ref([]);
 let notFound = ref([]);
+
 // shuffle cards mix order
 let shuffledCardsData = shuffle(duplicateCards);
 
 let cards = reactive(shuffledCardsData);
 cards.forEach((card) => {
   card.isFlipped = false;
-  notFound.value.push(card.image);
+  notFound.value.push(card);
 });
 
 function shuffle(array) {
@@ -44,20 +48,16 @@ function shuffle(array) {
   return newArray;
 }
 
-console.log("notfound value :", notFound.value);
-console.log("found value :", found.value);
-// console.log(typeof notFound.value, typeof found.value);
 // const flip = ref(null);
 // const finished = ref(false);
 
 // flip 2 cards and compare them
 function flipCard(card) {
-  console.log("flip called", card, typeof card);
   // timerTriggerStart.value.start();
   card.isFlipped = true;
+
   pairs.value.push(card);
   if (pairs.value.length == 2) {
-    console.log(pairs.value[0].image, pairs.value[1].image);
     compare(pairs.value[0].image, pairs.value[1].image);
   }
 }
@@ -65,17 +65,18 @@ function flipCard(card) {
 function compare(a, b) {
   if (a == b) {
     console.log("match", a, b);
-    found.value.push(a, b);
+    // found.value.push(a, b);
+
+    let pairOfCardsFound = cards.filter((element) => element.image == a);
+    //returns object with 2 cards found which share same image
+
+    found.value.push(...pairOfCardsFound);
 
     // remove found values from not found
     notFound.value = notFound.value.filter(
       (item) => !found.value.includes(item)
     );
-    // console.log("found :", found);
-    // console.log("pairs found" + found.value);
-    // console.log("pairs not found" + notFound.value);
   } else {
-    console.log("no match");
     // unflip cards after 1 second
     pairs.value.forEach((card) => {
       setTimeout(() => {
@@ -85,6 +86,10 @@ function compare(a, b) {
   }
   pairs.value = [];
 }
+
+// TODO
+// watch flipped cards number in the not found array
+// il flipped cards >2 unflipp all from not found
 </script>
 
 <template>
