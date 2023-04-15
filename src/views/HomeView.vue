@@ -53,6 +53,14 @@ function shuffle(array) {
 
 // flip 2 cards and compare them
 function flipCard(card) {
+  if (comparedCards.value.length >= 2) {
+    // <-- cannot have more than two cards open at the same time
+    unflip(); //<--- abort timeout, unflip right away
+  }
+  if (card.isFlipped) {
+    //<--- prevent flipping the same card twice
+    return;
+  }
   card.isFlipped = true;
   clicksNumber.value += 1;
   comparedCards.value.push(card);
