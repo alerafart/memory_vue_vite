@@ -1,4 +1,4 @@
 <script setup></script>
 <template>
-  <header>footer</header>
+  <footer></footer>
 </template>

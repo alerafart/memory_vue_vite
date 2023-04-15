@@ -6,7 +6,7 @@ import LayoutFooter from "@/components/layout/LayoutFooter.vue";
 // const route = useRoute();
 </script>
 <template>
-  <div class="layout min-h-screen w-screen bg-green">
+  <div class="layout min-h-screen w-screen bg-green-100">
     <LayoutHeader />
 
     <div class="slot min-h-full w-full">

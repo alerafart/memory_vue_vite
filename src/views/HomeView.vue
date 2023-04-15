@@ -1,15 +1,16 @@
 <script setup>
-import { ref, reactive, onUpdated, onMounted } from "vue";
+import { ref, reactive, onUpdated, watch, onMounted } from "vue";
 
 import cardsData from "../data/animals.json";
+import { computed } from "vue";
 onMounted(() => {
-  console.log("onMounted notfound value :", notFound.value);
-  console.log("onMounted found value :", found.value);
+  console.log(
+    notFound.value,
+    "notfound value, n items:",
+    notFound.value.length
+  );
 });
-onUpdated(() => {
-  console.log("onUpdated notfound value :", notFound.value);
-  console.log("onUpdated found value :", found.value);
-});
+
 // duplicate each card of the deck
 let duplicateCards = cardsData.concat(cardsData);
 
@@ -20,16 +21,18 @@ duplicateCards = duplicateCards.map((card, index) => {
     id: (index + 1).toString().padStart(2, "0"),
   };
 });
-const pairs = ref([]);
+const comparedCards = ref([]);
 const found = ref([]);
 let notFound = ref([]);
-
+let clicksNumber = ref(0);
+// let flippedCardsInNotFound = ref();
 // shuffle cards mix order
 let shuffledCardsData = shuffle(duplicateCards);
 
 let cards = reactive(shuffledCardsData);
 cards.forEach((card) => {
   card.isFlipped = false;
+  // notFound.value.push(card.image);
   notFound.value.push(card);
 });
 
@@ -48,55 +51,59 @@ function shuffle(array) {
   return newArray;
 }
 
-// const flip = ref(null);
-// const finished = ref(false);
-
 // flip 2 cards and compare them
 function flipCard(card) {
-  // timerTriggerStart.value.start();
   card.isFlipped = true;
-
-  pairs.value.push(card);
-  if (pairs.value.length == 2) {
-    compare(pairs.value[0].image, pairs.value[1].image);
+  clicksNumber.value += 1;
+  comparedCards.value.push(card);
+  if (comparedCards.value.length === 2) {
+    compare(comparedCards.value[0], comparedCards.value[1]);
   }
 }
+
+let timeoutId = null;
+
+function unflip() {
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+    timeoutId = null;
+  }
+  comparedCards.value.forEach((card) => (card.isFlipped = false));
+  comparedCards.value = [];
+}
+
 // compares 2 flipped cards
 function compare(a, b) {
-  if (a == b) {
-    console.log("match", a, b);
-    // found.value.push(a, b);
-
-    let pairOfCardsFound = cards.filter((element) => element.image == a);
-    //returns object with 2 cards found which share same image
-
-    found.value.push(...pairOfCardsFound);
-
+  if (a.image == b.image) {
+    found.value.push(a, b);
     // remove found values from not found
     notFound.value = notFound.value.filter(
       (item) => !found.value.includes(item)
     );
+    comparedCards.value = [];
   } else {
-    // unflip cards after 1 second
-    pairs.value.forEach((card) => {
-      setTimeout(() => {
-        card.isFlipped = false;
-      }, 1500);
-    });
+    timeoutId = setTimeout(unflip, 1500); // <--- wait to unflip
   }
-  pairs.value = [];
 }
 
-// TODO
-// watch flipped cards number in the not found array
-// il flipped cards >2 unflipp all from not found
+onUpdated(() => {
+  let flippedNotFound = ref(
+    notFound.value.filter((obj) => obj.isFlipped === true)
+  );
+  if (flippedNotFound.value.length > 2) {
+    notFound.value.forEach((kard) => {
+      kard.isFlipped = false;
+    });
+  }
+});
 </script>
 
 <template>
   <div class="wrapper flex justify-center">
-    <main class="grid grid-cols-6 gap-1">
+    <main class="grid grid-cols-6 gap-3">
       <div class="card w-40 h-40" v-for="(card, index) in cards" :key="index">
         <img
+          class="rounded-lg shadow-lg shadow-green-700 border border-gray"
           @click="flipCard(card)"
           :src="
             card.isFlipped
