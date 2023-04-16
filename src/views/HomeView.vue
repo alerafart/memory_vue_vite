@@ -1,5 +1,12 @@
 <script setup>
-import { ref, reactive, onUpdated, onMounted } from "vue";
+import {
+  ref,
+  reactive,
+  onUpdated,
+  onMounted,
+  watch,
+  watchPostEffect,
+} from "vue";
 
 import cardsData from "../data/animals.json";
 
@@ -9,8 +16,7 @@ function pickRandomCards(arr, num) {
   return shuffled.slice(0, num);
 }
 
-console.log(pickRandomCards(cardsData, 4));
-let randomCards = pickRandomCards(cardsData, 9);
+let randomCards = pickRandomCards(cardsData, 8);
 
 // duplicate each card of the deck
 let duplicateCards = randomCards.concat(randomCards);
@@ -22,18 +28,19 @@ duplicateCards = duplicateCards.map((card, index) => {
     id: (index + 1).toString().padStart(2, "0"),
   };
 });
+let totalCardsNumber = duplicateCards.length;
+console.log(totalCardsNumber);
 const comparedCards = ref([]);
 const found = ref([]);
 let notFound = ref([]);
 let clicksNumber = ref(0);
-// let flippedCardsInNotFound = ref();
+let isMatchFinished = ref(false);
 // shuffle cards mix order
 let shuffledCardsData = shuffle(duplicateCards);
 
-let cards = reactive(shuffledCardsData);
-cards.forEach((card) => {
+let gridCards = reactive(shuffledCardsData);
+gridCards.forEach((card) => {
   card.isFlipped = false;
-  // notFound.value.push(card.image);
   notFound.value.push(card);
 });
 
@@ -52,19 +59,20 @@ function shuffle(array) {
   return newArray;
 }
 
+let pairsRemaining = ref(gridCards.length / 2);
+
 // flip 2 cards and compare them
 function flipCard(card) {
   if (comparedCards.value.length >= 2) {
-    // console.log("if comparedCards.value.length >= 2");
     // <-- cannot have more than two cards open at the same time
     unflip(); //<--- abort timeout, unflip right away
   }
   if (card.isFlipped) {
-    // console.log("flip card already flipped");
     //<--- prevent flipping the same card twice
     return;
   }
   card.isFlipped = true;
+
   clicksNumber.value += 1;
   comparedCards.value.push(card);
   if (comparedCards.value.length === 2) {
@@ -93,39 +101,79 @@ function compare(a, b) {
     notFound.value = notFound.value.filter(
       (item) => !found.value.includes(item)
     );
+
     comparedCards.value = [];
   } else {
     timeoutId = setTimeout(unflip, 1500); // <--- wait to unflip
   }
 }
 
+// watchPostEffect(() => {
+//   /* executed after Vue updates */
+//   if (isMatchFinished.value) {
+//     // .value = true;
+//     alert("win");
+//   }
+// });
+// if (notFound.value.length === 0) {
+//
+//   } alert("win");
+// watch(
+//   () => isMatchFinished.value,
+//   () => {
+//     // fires only when state.someObject is replaced
+//     setTimeout(alert("win"), 3000);
+//   }
+// );
+// // watch(isMatchFinished.value, (newisMatchFinished) => {
+//   console.log(`x is ${newisMatchFinished}`);
+// });
 onUpdated(() => {
-  let flippedNotFound = ref(
-    notFound.value.filter((obj) => obj.isFlipped === true)
-  );
-  if (flippedNotFound.value.length > 2) {
-    notFound.value.forEach((kard) => {
-      kard.isFlipped = false;
-    });
-  }
+  console.log(gridCards);
+  pairsRemaining.value = notFound.value.length / 2;
 });
 </script>
 
 <template>
-  <div class="wrapper flex justify-center">
-    <main class="grid grid-cols-6 gap-3">
-      <div class="card w-40 h-40" v-for="(card, index) in cards" :key="index">
-        <img
-          class="rounded-lg shadow-lg shadow-green-700 border border-gray"
-          @click="flipCard(card)"
-          :src="
-            card.isFlipped
-              ? '../img/animals/' + card.image
-              : '../img/square.jpg'
-          "
-          :alt="card.id"
-        />
+  <main class="w-full flex justify-center">
+    <div
+      class="wrapper flex-col justify-center align-center content-center m-10 w-5/6"
+    >
+      <div
+        class="flex justify-between items-center w-full border-b pb-2 mb-4 border-green-500"
+      >
+        <div class="flex justify-center items-center my-2">
+          <span class="text-2xl mx-4">Pairs remaining</span>
+          <div
+            class="flex justify-center text-4xl items-center border border-green rounded-full w-16 h-16"
+          >
+            {{ pairsRemaining }}
+          </div>
+        </div>
+        <div class="flex justify-center items-center my-2">
+          <span class="text-2xl mx-4">You clicked</span>
+          <div
+            class="flex justify-center text-4xl items-center border border-green rounded-full w-16 h-16"
+          >
+            {{ clicksNumber }}
+          </div>
+          <span class="text-2xl mx-4">times</span>
+        </div>
       </div>
-    </main>
-  </div>
+      <section class="grid grid-cols-4 gap-3 text-center">
+        <div class="card" v-for="(card, index) in gridCards" :key="index">
+          <img
+            class="rounded-lg shadow-lg shadow-green-700 border border-gray w-52 h-52"
+            @click="flipCard(card)"
+            :src="
+              card.isFlipped
+                ? '../img/animals/' + card.image
+                : '../img/question.jpg'
+            "
+            :alt="card.id"
+          />
+        </div>
+      </section>
+    </div>
+  </main>
 </template>
