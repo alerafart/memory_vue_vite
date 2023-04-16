@@ -1,18 +1,19 @@
 <script setup>
-import { ref, reactive, onUpdated, watch, onMounted } from "vue";
+import { ref, reactive, onUpdated, onMounted } from "vue";
 
 import cardsData from "../data/animals.json";
-import { computed } from "vue";
-onMounted(() => {
-  console.log(
-    notFound.value,
-    "notfound value, n items:",
-    notFound.value.length
-  );
-});
+
+//method to choose a number of cards from the whole deck
+function pickRandomCards(arr, num) {
+  const shuffled = [...arr].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, num);
+}
+
+console.log(pickRandomCards(cardsData, 4));
+let randomCards = pickRandomCards(cardsData, 9);
 
 // duplicate each card of the deck
-let duplicateCards = cardsData.concat(cardsData);
+let duplicateCards = randomCards.concat(randomCards);
 
 // rename each id with a different value, before we had each id twice and we need unique objects to flip each card sepparately
 duplicateCards = duplicateCards.map((card, index) => {
@@ -54,10 +55,12 @@ function shuffle(array) {
 // flip 2 cards and compare them
 function flipCard(card) {
   if (comparedCards.value.length >= 2) {
+    // console.log("if comparedCards.value.length >= 2");
     // <-- cannot have more than two cards open at the same time
     unflip(); //<--- abort timeout, unflip right away
   }
   if (card.isFlipped) {
+    // console.log("flip card already flipped");
     //<--- prevent flipping the same card twice
     return;
   }
@@ -72,7 +75,9 @@ function flipCard(card) {
 let timeoutId = null;
 
 function unflip() {
+  console.log("unflip");
   if (timeoutId) {
+    console.log("unflip if timeout id clear", timeoutId);
     clearTimeout(timeoutId);
     timeoutId = null;
   }
